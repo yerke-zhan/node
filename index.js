@@ -17,41 +17,76 @@ app.get('/', (req, res) => {
 });
 
 
-// app.get('/api/books', (req, res) => {
-//     res.json(books);
-// });
 
-app.get('/api/books/search', (req, res) => {
-    const {title} = req.query
-    if(!title){
-        res.json(books)
+app.post('/api/books', (req, res) => {
+    const {title, author, year} = req.body;
+    if (!title && !author && !year){
+       return res.status(401).json({error: 'Деректерді енгіз.'})
     }
-
-    const filteredBooks = books.filter(book => book.title.toLowerCase().includes(title.toLowerCase()))
+    const existingBook = books.find(book =>      
+        book.title.toLowerCase() === title.toLowerCase() && book.author.toLowerCase() === author.toLowerCase()
+    )
     
-    res.json(filteredBooks)
-})
-
-app.get('/api/books/:id', (req, res) => {
-    const {id} = req.params
-    const book = books.find(book => book.id === parseInt(id))
-    if(!book){
-        res.status(404).json ({error: 'Book not found'})
+    if (existingBook) {
+        return res.status(409).json({error: 'this book is exist'})
     }
-    res.json(book)
+    const newBook = {
+        id: books.length + 1, 
+        title, 
+        author, 
+        year
+    };
+    books.push(newBook)
+res.status(201).json({message: 'Кітап қосылды', book: newBook})
 })
 
-app.get('/api/books', (req, res) => {
-    const {sort} = req.query
 
-    let result =[...books]
-    if(sort === 'asc'){
-        result.sort((a,b) => a.year - b.year)
-    }else if(sort === 'desc'){
-        result.sort((a,b) => b.year - a.year)
-    }
-    res.send(result)
-})
+
+
+
+
+
+
+
+
+
+
+
+// // app.get('/api/books', (req, res) => {
+// //     res.json(books);
+// // });
+
+// app.get('/api/books/search', (req, res) => {
+//     const {title} = req.query
+//     if(!title){
+//         res.json(books)
+//     }
+
+//     const filteredBooks = books.filter(book => book.title.toLowerCase().includes(title.toLowerCase()))
+    
+//     res.json(filteredBooks)
+// })
+
+// app.get('/api/books/:id', (req, res) => {
+//     const {id} = req.params
+//     const book = books.find(book => book.id === parseInt(id))
+//     if(!book){
+//         res.status(404).json ({error: 'Book not found'})
+//     }
+//     res.json(book)
+// })
+
+// app.get('/api/books', (req, res) => {
+//     const {sort} = req.query
+
+//     let result =[...books]
+//     if(sort === 'asc'){
+//         result.sort((a,b) => a.year - b.year)
+//     }else if(sort === 'desc'){
+//         result.sort((a,b) => b.year - a.year)
+//     }
+//     res.send(result)
+// })
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
